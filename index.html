@@ -3,190 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>儲存進度追蹤器 (記憶版)</title>
+    <title>存款累計追蹤器</title>
     <style>
         :root {
-            --primary-color: #2ecc71;
-            --bg-color: #f4f7f6;
-            --accent-color: #f1c40f;
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --bg-color: #f8f9fa;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
+            padding: 20px;
+            margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
         }
 
         .container {
             background: white;
-            padding: 2.5rem;
+            padding: 2rem;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
         }
 
-        h2 {
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        
+        .total-display {
             text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
             color: #2c3e50;
+            margin: 10px 0;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
             margin-bottom: 2rem;
-            font-weight: 700;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.8rem;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
         }
 
         input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #edf2f7;
-            border-radius: 12px;
-            box-sizing: border-box;
-            font-size: 1.2rem;
-            color: #2d3436;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        input:focus {
-            border-color: var(--primary-color);
-            background: white;
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
             outline: none;
-            box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.1);
         }
 
-        .stats {
+        button {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .progress-section { margin-bottom: 2rem; }
+        
+        .progress-bar-bg {
+            background: #eee;
+            height: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        #progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--success-color);
+            transition: width 0.5s ease;
+        }
+
+        .history-section {
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 2rem;
-            font-weight: 600;
-        }
-
-        .percent-large {
-            font-size: 2rem;
-            color: var(--primary-color);
-        }
-
-        .goal-tag {
-            background: #eee;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            padding: 8px 0;
+            border-bottom: 1px dashed #f0f0f0;
+            font-size: 0.9rem;
             color: #666;
         }
 
-        .progress-container {
-            background: #edf2f7;
-            border-radius: 50px;
-            height: 12px;
-            width: 100%;
-            margin: 1rem 0 2rem 0;
-            overflow: hidden;
-        }
-
-        #progress-bar {
-            background: var(--primary-color);
-            height: 100%;
-            width: 0%;
-            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .message {
-            text-align: center;
-            padding: 1rem;
-            border-radius: 10px;
-            background: #fdfdfd;
-            border: 1px dashed #dcdde1;
-            color: #636e72;
-            min-height: 24px;
-        }
-
-        .success-text {
-            color: #27ae60;
-            font-weight: bold;
+        .reset-btn {
+            background: none;
+            color: #e74c3c;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: none;
+            display: block;
+            margin: 20px auto 0;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>我的儲存目標</h2>
-    
-    <div class="input-group">
-        <label for="currentAmount">目前現金總額 (AUTO SAVED)</label>
-        <input type="number" id="currentAmount" placeholder="輸入金額..." oninput="updateProgress()">
+    <div class="header">
+        <h2>目標存入：$18,000</h2>
+        <div class="total-display">$ <span id="totalDisplay">0</span></div>
     </div>
 
-    <div class="stats">
-        <div>
-            <span class="percent-large" id="percentText">0</span><small>%</small>
+    <div class="input-box">
+        <input type="number" id="amountInput" placeholder="輸入本次投入金額">
+        <button onclick="addAmount()">投入</button>
+    </div>
+
+    <div class="progress-section">
+        <div style="display:flex; justify-content: space-between; font-size: 0.9rem;">
+            <span>進度：<span id="percentText">0</span>%</span>
+            <span>剩餘：$<span id="remainingText">18,000</span></span>
         </div>
-        <div class="goal-tag">目標: $18,000</div>
+        <div class="progress-bar-bg">
+            <div id="progress-fill"></div>
+        </div>
     </div>
 
-    <div class="progress-container">
-        <div id="progress-bar"></div>
+    <div class="history-section">
+        <div style="font-weight: bold; margin-bottom: 10px;">存款紀錄</div>
+        <div id="historyList" class="history-list">
+            </div>
     </div>
 
-    <div class="message" id="message">
-        等待輸入中...
-    </div>
+    <button class="reset-btn" onclick="resetAll()">重設所有數據</button>
 </div>
 
 <script>
-    // 頁面載入時：讀取先前儲存的資料
+    const GOAL = 18000;
+    let total = 0;
+    let history = [];
+
+    // 初始化載入
     window.onload = function() {
-        const savedAmount = localStorage.getItem('mySavings');
-        if (savedAmount) {
-            document.getElementById('currentAmount').value = savedAmount;
-            updateProgress();
+        const savedData = JSON.parse(localStorage.getItem('savingData'));
+        if (savedData) {
+            total = savedData.total || 0;
+            history = savedData.history || [];
+            updateUI();
         }
     };
 
-    function updateProgress() {
-        const goal = 18000;
-        const inputField = document.getElementById('currentAmount');
-        const progressBar = document.getElementById('progress-bar');
-        const percentText = document.getElementById('percentText');
-        const message = document.getElementById('message');
+    function addAmount() {
+        const input = document.getElementById('amountInput');
+        const value = parseFloat(input.value);
 
-        let current = parseFloat(inputField.value) || 0;
-        
-        // 儲存到瀏覽器記憶體
-        localStorage.setItem('mySavings', inputField.value);
-        
-        // 計算百分比
-        let percentage = (current / goal) * 100;
-        let displayPercent = Math.min(percentage, 100).toFixed(1);
-        
-        // 更新 UI 視覺效果
-        progressBar.style.width = Math.min(percentage, 100) + '%';
-        percentText.innerText = displayPercent;
+        if (isNaN(value) || value <= 0) {
+            alert("請輸入正確的金額");
+            return;
+        }
 
-        // 更新狀態訊息
-        let remaining = goal - current;
-        if (current >= goal) {
-            message.innerHTML = "<span class='success-text'>✨ 太棒了！已達成 18,000 目標！</span>";
-            progressBar.style.backgroundColor = "var(--accent-color)";
-        } else if (current > 0) {
-            message.innerHTML = `距離目標還差 <b>$${remaining.toLocaleString()}</b>`;
-            progressBar.style.backgroundColor = "var(--primary-color)";
-        } else {
-            message.innerText = "請開始輸入金額";
+        // 累計金額
+        total += value;
+        
+        // 加入紀錄
+        const now = new Date();
+        const dateStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
+        history.unshift({ date: dateStr, amount: value }); // 新的在前
+
+        // 存入 localStorage
+        saveData();
+        
+        // 更新介面
+        updateUI();
+        
+        // 清空輸入框
+        input.value = '';
+    }
+
+    function updateUI() {
+        document.getElementById('totalDisplay').innerText = total.toLocaleString();
+        
+        const percent = Math.min((total / GOAL) * 100, 100).toFixed(1);
+        document.getElementById('percentText').innerText = percent;
+        document.getElementById('progress-fill').style.width = percent + '%';
+        
+        const remaining = Math.max(GOAL - total, 0);
+        document.getElementById('remainingText').innerText = remaining.toLocaleString();
+
+        // 更新紀錄列表
+        const listContainer = document.getElementById('historyList');
+        listContainer.innerHTML = history.map(item => `
+            <div class="history-item">
+                <span>📅 ${item.date}</span>
+                <span><b>+$${item.amount.toLocaleString()}</b></span>
+            </div>
+        `).join('');
+    }
+
+    function saveData() {
+        localStorage.setItem('savingData', JSON.stringify({
+            total: total,
+            history: history
+        }));
+    }
+
+    function resetAll() {
+        if (confirm("確定要刪除所有存款紀錄嗎？此動作無法復原。")) {
+            localStorage.removeItem('savingData');
+            total = 0;
+            history = [];
+            updateUI();
         }
     }
 </script>
